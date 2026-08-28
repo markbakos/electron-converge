@@ -1,0 +1,26 @@
+{
+  "name": "electron-converge",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "packageManager": "pnpm@11.21.0",
+  "engines": {
+    "node": ">=24.18.1",
+    "pnpm": ">=11 <12"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "tsc -b --clean",
+    "check": "pnpm build"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2"
+  }
+}
