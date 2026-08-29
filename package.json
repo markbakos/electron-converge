@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -16,6 +18,14 @@
     "./renderer": {
       "types": "./dist/electron-renderer/index.d.ts",
       "import": "./dist/electron-renderer/index.js"
+    },
+    "./preload": {
+      "types": "./dist/electron-preload/index.d.ts",
+      "import": "./dist/electron-preload/index.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js"
     }
   },
   "packageManager": "pnpm@11.21.0",
@@ -24,17 +34,31 @@
     "pnpm": ">=11 <12"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b --clean && tsc",
+    "build:fixture": "node scripts/build-electron-fixture.mjs",
+    "bench": "pnpm build && pnpm build:fixture && node bench/electron.mjs",
     "clean": "tsc -b --clean",
-    "test": "pnpm build && node --test test/*.test.mjs test/protocol/*.test.mjs && tsc -p tsconfig.test.json",
+    "test": "pnpm build && pnpm build:fixture && node --test test/*.test.mjs test/protocol/*.test.mjs && tsc -p tsconfig.test.json",
+    "test:e2e": "pnpm build && pnpm build:fixture && node --test test/electron-e2e.test.mjs",
+    "test:pack": "pnpm build && node scripts/verify-package.mjs",
     "check": "pnpm test"
   },
   "peerDependencies": {
-    "electron": ">=42 <45"
+    "electron": ">=42 <45",
+    "react": ">=18 <20"
   },
   "devDependencies": {
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5",
+    "@types/use-sync-external-store": "1.5.0",
     "electron": "42.10.1",
+    "esbuild": "0.28.2",
     "fast-check": "4.9.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
     "typescript": "7.0.2"
+  },
+  "dependencies": {
+    "use-sync-external-store": "1.6.0"
   }
 }

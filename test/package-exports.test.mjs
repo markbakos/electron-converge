@@ -11,4 +11,12 @@ test("process subpaths resolve separately from the Electron-free root", () => {
     import.meta.resolve("electron-converge/renderer"),
     /dist\/electron-renderer\/index\.js$/u,
   );
+  assert.match(
+    import.meta.resolve("electron-converge/preload"),
+    /dist\/electron-preload\/index\.js$/u,
+  );
+  assert.match(
+    import.meta.resolve("electron-converge/react"),
+    /dist\/react\/index\.js$/u,
+  );
 });

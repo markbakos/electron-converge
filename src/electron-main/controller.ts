@@ -10,6 +10,7 @@ import type {
 
 import { ConvergeError, errorFromCode, serializeError } from "../errors.js";
 import type { ErrorCode } from "../errors.js";
+import { ELECTRON_CHANNELS } from "../electron/channels.js";
 import { createProtocolHost } from "../protocol/host.js";
 import type {
   AttachRequest,
@@ -33,18 +34,13 @@ import {
   isPlainRecord,
 } from "../wire/validation.js";
 
+export { ELECTRON_CHANNELS } from "../electron/channels.js";
+
 const MAX_STORES = 64;
 const MAX_RENDERERS = 128;
 const MAX_SESSIONS = 128;
 const MAX_ATTACHMENTS = 64;
 const MAX_REQUESTS_PER_SECOND = 1_024;
-
-export const ELECTRON_CHANNELS = Object.freeze({
-  attach: "electron-converge:v1:attach",
-  command: "electron-converge:v1:command",
-  recover: "electron-converge:v1:recover",
-  commit: "electron-converge:v1:commit",
-});
 
 type MainRequest = AttachRequest | CommandRequest | RecoverRequest;
 type Operation = "attach" | "command" | "recover";
