@@ -4,10 +4,13 @@ export type ErrorCode =
   | "INTERNAL_ERROR"
   | "INVALID_COMMIT"
   | "INVALID_INPUT"
+  | "INVALID_PROTOCOL"
   | "INVALID_STATE"
   | "INVALID_STORE"
+  | "RECOVERY_FAILED"
   | "REVISION_EXHAUSTED"
   | "SERIALIZATION_FAILED"
+  | "STALE_SESSION"
   | "UNKNOWN_ACTION";
 
 const ERROR_MESSAGES: Record<ErrorCode, string> = {
@@ -16,10 +19,13 @@ const ERROR_MESSAGES: Record<ErrorCode, string> = {
   INTERNAL_ERROR: "Internal error",
   INVALID_COMMIT: "Invalid commit",
   INVALID_INPUT: "Invalid action input",
+  INVALID_PROTOCOL: "Invalid protocol message",
   INVALID_STATE: "Invalid state",
   INVALID_STORE: "Invalid store",
+  RECOVERY_FAILED: "Recovery failed",
   REVISION_EXHAUSTED: "Revision limit reached",
   SERIALIZATION_FAILED: "Serialization failed",
+  STALE_SESSION: "Stale session",
   UNKNOWN_ACTION: "Unknown action",
 };
 
@@ -38,12 +44,19 @@ export interface SerializedConvergeError {
   readonly message: string;
 }
 
+export function isErrorCode(value: unknown): value is ErrorCode {
+  return typeof value === "string" && Object.hasOwn(ERROR_MESSAGES, value);
+}
+
+export function errorFromCode(code: ErrorCode): ConvergeError {
+  return new ConvergeError(code, ERROR_MESSAGES[code]);
+}
+
 export function serializeError(error: unknown): SerializedConvergeError {
   if (error instanceof ConvergeError) {
     const code: unknown = error.code;
-    if (typeof code === "string" && Object.hasOwn(ERROR_MESSAGES, code)) {
-      const safeCode = code as ErrorCode;
-      return { code: safeCode, message: ERROR_MESSAGES[safeCode] };
+    if (isErrorCode(code)) {
+      return { code, message: ERROR_MESSAGES[code] };
     }
   }
   return { code: "INTERNAL_ERROR", message: "Internal error" };

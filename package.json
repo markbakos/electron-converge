@@ -18,10 +18,11 @@
   "scripts": {
     "build": "tsc",
     "clean": "tsc -b --clean",
-    "test": "pnpm build && node --test test/*.test.mjs && tsc -p tsconfig.test.json",
+    "test": "pnpm build && node --test test/*.test.mjs test/protocol/*.test.mjs && tsc -p tsconfig.test.json",
     "check": "pnpm test"
   },
   "devDependencies": {
+    "fast-check": "4.9.0",
     "typescript": "7.0.2"
   }
 }
