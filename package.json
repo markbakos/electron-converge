@@ -18,7 +18,8 @@
   "scripts": {
     "build": "tsc",
     "clean": "tsc -b --clean",
-    "check": "pnpm build"
+    "test": "pnpm build && node --test test/*.test.mjs && tsc -p tsconfig.test.json",
+    "check": "pnpm test"
   },
   "devDependencies": {
     "typescript": "7.0.2"
