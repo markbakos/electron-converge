@@ -16,6 +16,19 @@ const definition = defineStore<AppState>()({
     counter: { value: 0 },
     settings: { theme: "dark" },
   },
+  inputs: {
+    increment(value: unknown): value is { by: number } {
+      return (
+        typeof value === "object" &&
+        value !== null &&
+        "by" in value &&
+        typeof value.by === "number"
+      );
+    },
+    reset(value: unknown): value is undefined {
+      return value === undefined;
+    },
+  },
   actions: {
     increment(state, input: { by: number }) {
       const value = state.counter.value + input.by;
@@ -29,6 +42,33 @@ const definition = defineStore<AppState>()({
         state: { ...state, counter: { value: 0 } },
         result: undefined,
       };
+    },
+  },
+});
+
+defineStore<AppState>()({
+  id: "missing-validator",
+  initialState: { counter: { value: 0 }, settings: { theme: "dark" } },
+  // @ts-expect-error every action requires one input validator
+  inputs: {},
+  actions: {
+    increment(state, input: { by: number }) {
+      return { state, result: input.by };
+    },
+  },
+});
+
+defineStore<AppState>()({
+  id: "extra-validator",
+  initialState: { counter: { value: 0 }, settings: { theme: "dark" } },
+  inputs: {
+    increment: (_value: unknown) => true,
+    // @ts-expect-error validator keys must exactly match action keys
+    unused: (_value: unknown) => true,
+  },
+  actions: {
+    increment(state, input: { by: number }) {
+      return { state, result: input.by };
     },
   },
 });

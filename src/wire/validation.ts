@@ -3,6 +3,34 @@ import type { ErrorCode } from "../errors.js";
 
 declare const structuredClone: <Value>(value: Value) => Value;
 
+const INBOUND_LIMITS = Object.freeze({
+  depth: 64,
+  entries: 10_000,
+  stringUnits: 4_000_000,
+});
+
+class WireLimitError extends Error {}
+
+interface WireBudget {
+  entries: number;
+  stringUnits: number;
+}
+
+export function cloneInboundWire<Value>(value: Value): Value {
+  try {
+    inspectWire(value, new WeakSet<object>(), 0, {
+      entries: 0,
+      stringUnits: 0,
+    });
+    return deepFreeze(structuredClone(value));
+  } catch (error) {
+    if (error instanceof WireLimitError) {
+      throw new ConvergeError("RESOURCE_LIMIT", "Resource limit exceeded");
+    }
+    throw new ConvergeError("INVALID_PROTOCOL", "Invalid protocol message");
+  }
+}
+
 export function cloneWire<Value>(
   value: Value,
   code: ErrorCode,
@@ -40,7 +68,33 @@ export function isPlainRecord(value: unknown): value is Record<string, unknown> 
   }
 }
 
-function inspectWire(value: unknown, seen: WeakSet<object>): void {
+export function isWireIdentifier(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    value.length > 0 &&
+    value.length <= 128 &&
+    !/[\u0000-\u001f\u007f-\u009f]/u.test(value)
+  );
+}
+
+function inspectWire(
+  value: unknown,
+  seen: WeakSet<object>,
+  depth = 0,
+  budget?: WireBudget,
+): void {
+  if (budget) {
+    budget.entries += 1;
+    if (
+      depth > INBOUND_LIMITS.depth ||
+      budget.entries > INBOUND_LIMITS.entries
+    ) {
+      throw new WireLimitError();
+    }
+    if (typeof value === "string") {
+      countStringUnits(value, budget);
+    }
+  }
   if (
     value === null ||
     value === undefined ||
@@ -67,7 +121,13 @@ function inspectWire(value: unknown, seen: WeakSet<object>): void {
       ) {
         throw new TypeError();
       }
-      inspectDescriptor(Object.getOwnPropertyDescriptor(value, key), seen);
+      if (budget) countStringUnits(key, budget);
+      inspectDescriptor(
+        Object.getOwnPropertyDescriptor(value, key),
+        seen,
+        depth + 1,
+        budget,
+      );
     }
     seen.delete(value);
     return;
@@ -76,17 +136,32 @@ function inspectWire(value: unknown, seen: WeakSet<object>): void {
 
   for (const key of Reflect.ownKeys(value)) {
     if (typeof key !== "string" || isUnsafeKey(key)) throw new TypeError();
-    inspectDescriptor(Object.getOwnPropertyDescriptor(value, key), seen);
+    if (budget) countStringUnits(key, budget);
+    inspectDescriptor(
+      Object.getOwnPropertyDescriptor(value, key),
+      seen,
+      depth + 1,
+      budget,
+    );
   }
   seen.delete(value);
+}
+
+function countStringUnits(value: string, budget: WireBudget): void {
+  budget.stringUnits += value.length;
+  if (budget.stringUnits > INBOUND_LIMITS.stringUnits) {
+    throw new WireLimitError();
+  }
 }
 
 function inspectDescriptor(
   descriptor: PropertyDescriptor | undefined,
   seen: WeakSet<object>,
+  depth: number,
+  budget?: WireBudget,
 ): void {
   if (!descriptor?.enumerable || !("value" in descriptor)) throw new TypeError();
-  inspectWire(descriptor.value, seen);
+  inspectWire(descriptor.value, seen, depth, budget);
 }
 
 function isUnsafeKey(key: string): boolean {

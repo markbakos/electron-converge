@@ -1,5 +1,8 @@
 import { ConvergeError, serializeError } from "../errors.js";
-import type { ActionMap, CanonicalStore, DispatchResult } from "../store/types.js";
+import {
+  canonicalStoreRuntime,
+  type CanonicalStoreRuntime,
+} from "../store/types.js";
 import type {
   Attached,
   CommandResult,
@@ -15,34 +18,29 @@ import {
 
 const MAX_RECENT_COMMITS = 64;
 
-interface Session<State extends object> {
-  readonly send: (commit: ProtocolCommit<State>) => void;
+interface Session {
+  readonly send: (commit: ProtocolCommit<object>) => void;
 }
 
-export interface ProtocolHost<State extends object> {
+export interface ProtocolHost {
   attach(
     request: unknown,
-    send: (commit: ProtocolCommit<State>) => void,
-  ): Attached<State> | ProtocolError;
-  command(request: unknown): CommandResult<State> | ProtocolError;
-  recover(request: unknown): RecoveryResult<State> | ProtocolError;
+    send: (commit: ProtocolCommit<object>) => void,
+  ): Attached<object> | ProtocolError;
+  command(request: unknown): CommandResult<object> | ProtocolError;
+  recover(request: unknown): RecoveryResult<object> | ProtocolError;
   detach(sessionId: string): void;
 }
 
-export function createProtocolHost<
-  State extends object,
-  Actions extends ActionMap<State>,
->(store: CanonicalStore<State, Actions>): ProtocolHost<State> {
-  const storeId = store.getSnapshot().storeId;
-  const sessions = new Map<string, Session<State>>();
-  const history: ProtocolCommit<State>[] = [];
-  const dispatch = store.dispatch as (
-    action: string,
-    input: unknown,
-  ) => DispatchResult<State, unknown>;
+export function createProtocolHost(store: CanonicalStoreRuntime): ProtocolHost {
+  const runtime = store[canonicalStoreRuntime]();
+  const storeId = runtime.getSnapshot().storeId;
+  const sessions = new Map<string, Session>();
+  const history: ProtocolCommit<object>[] = [];
 
   return {
     attach(value, send) {
+      let attachedSessionId: string | undefined;
       try {
         const request = parseAttachRequest(value);
         if (request.storeId !== storeId) {
@@ -53,14 +51,18 @@ export function createProtocolHost<
         }
 
         sessions.set(request.sessionId, { send });
+        attachedSessionId = request.sessionId;
         return {
           protocol: 1,
           type: "ATTACHED",
           storeId,
           sessionId: request.sessionId,
-          snapshot: store.getSnapshot(),
+          snapshot: runtime.getSnapshot(),
         };
       } catch (error) {
+        if (attachedSessionId !== undefined) {
+          sessions.delete(attachedSessionId);
+        }
         return protocolError(error);
       }
     },
@@ -87,7 +89,7 @@ export function createProtocolHost<
       }
 
       try {
-        const dispatched = dispatch(request.action, request.input);
+        const dispatched = runtime.dispatch(request.action, request.input);
         const commit = Object.freeze({
           ...dispatched.commit,
           commandId: request.commandId,
@@ -129,7 +131,7 @@ export function createProtocolHost<
           throw new ConvergeError("STALE_SESSION", "Stale session");
         }
 
-        const currentRevision = store.getRevision();
+        const currentRevision = runtime.getSnapshot().revision;
         if (request.fromRevision > currentRevision) {
           throw new ConvergeError("INVALID_PROTOCOL", "Invalid protocol message");
         }
@@ -157,7 +159,7 @@ export function createProtocolHost<
           type: "SNAPSHOT",
           storeId,
           sessionId: request.sessionId,
-          snapshot: store.getSnapshot(),
+          snapshot: runtime.getSnapshot(),
         };
       } catch (error) {
         return protocolError(error);

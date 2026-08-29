@@ -4,6 +4,20 @@ import type {
   Snapshot,
 } from "../wire/types.js";
 
+export const canonicalStoreRuntime: unique symbol = Symbol(
+  "electron-converge.canonical-store-runtime",
+);
+
+export interface CanonicalStoreRuntime {
+  readonly [canonicalStoreRuntime]: () => {
+    getSnapshot(): Snapshot<object>;
+    dispatch(
+      action: string,
+      input: unknown,
+    ): { readonly result: unknown; readonly commit: CoreCommit<object> };
+  };
+}
+
 export interface ActionOutcome<State extends object, Result> {
   readonly state: DeepReadonly<State>;
   readonly result: Result;
@@ -27,12 +41,17 @@ type ActionResult<Action extends (...args: never[]) => unknown> =
     ? Result
     : never;
 
+export type ActionInputValidators<Actions> = {
+  readonly [Name in keyof Actions]: (value: unknown) => boolean;
+};
+
 export interface StoreDefinition<
   State extends object,
   Actions extends ActionMap<State>,
 > {
   readonly id: string;
   readonly initialState: State;
+  readonly inputs: ActionInputValidators<NoInfer<Actions>>;
   readonly actions: Actions;
 }
 
@@ -44,7 +63,7 @@ export interface DispatchResult<State extends object, Result> {
 export interface CanonicalStore<
   State extends object,
   Actions extends ActionMap<State>,
-> {
+> extends CanonicalStoreRuntime {
   getState(): DeepReadonly<State>;
   getRevision(): number;
   getSnapshot(): Snapshot<State>;

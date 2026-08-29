@@ -12,6 +12,7 @@ export {
   defineStore,
 } from "./store/create-canonical-store.js";
 export type {
+  ActionInputValidators,
   ActionOutcome,
   ActionReducer,
   CanonicalStore,

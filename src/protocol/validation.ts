@@ -1,6 +1,10 @@
 import { ConvergeError, isErrorCode } from "../errors.js";
 import type { SerializedConvergeError } from "../errors.js";
-import { cloneWire, isPlainRecord } from "../wire/validation.js";
+import {
+  cloneWire,
+  isPlainRecord,
+  isWireIdentifier,
+} from "../wire/validation.js";
 import type {
   AttachRequest,
   Attached,
@@ -78,8 +82,8 @@ export function parseAttachRequest(value: unknown): AttachRequest {
   if (
     request.protocol !== 1 ||
     request.type !== "ATTACH" ||
-    !isIdentifier(request.storeId) ||
-    !isIdentifier(request.sessionId)
+    !isWireIdentifier(request.storeId) ||
+    !isWireIdentifier(request.sessionId)
   ) {
     throw invalidProtocol();
   }
@@ -91,10 +95,10 @@ export function parseCommandRequest(value: unknown): CommandRequest {
   if (
     request.protocol !== 1 ||
     request.type !== "COMMAND" ||
-    !isIdentifier(request.storeId) ||
-    !isIdentifier(request.sessionId) ||
-    !isIdentifier(request.commandId) ||
-    !isIdentifier(request.action)
+    !isWireIdentifier(request.storeId) ||
+    !isWireIdentifier(request.sessionId) ||
+    !isWireIdentifier(request.commandId) ||
+    !isWireIdentifier(request.action)
   ) {
     throw invalidProtocol();
   }
@@ -106,8 +110,8 @@ export function parseRecoverRequest(value: unknown): RecoverRequest {
   if (
     request.protocol !== 1 ||
     request.type !== "RECOVER" ||
-    !isIdentifier(request.storeId) ||
-    !isIdentifier(request.sessionId) ||
+    !isWireIdentifier(request.storeId) ||
+    !isWireIdentifier(request.sessionId) ||
     !Number.isSafeInteger(request.fromRevision) ||
     (request.fromRevision as number) < 0 ||
     typeof request.forceSnapshot !== "boolean"
@@ -174,8 +178,8 @@ export function parseProtocolCommit<State extends object>(
     commit.protocol !== 1 ||
     commit.type !== "COMMIT" ||
     commit.storeId !== storeId ||
-    !isIdentifier(commit.commandId) ||
-    !isIdentifier(commit.sourceSessionId)
+    !isWireIdentifier(commit.commandId) ||
+    !isWireIdentifier(commit.sourceSessionId)
   ) {
     throw invalidProtocol();
   }
@@ -244,10 +248,6 @@ function parseRecord(
     throw invalidProtocol();
   }
   return record;
-}
-
-function isIdentifier(value: unknown): value is string {
-  return typeof value === "string" && value.length > 0;
 }
 
 function isRevision(value: unknown): value is number {

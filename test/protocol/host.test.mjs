@@ -3,6 +3,7 @@ import test from "node:test";
 
 import { createCanonicalStore } from "../../dist/index.js";
 import { createProtocolHost } from "../../dist/protocol/host.js";
+import { canonicalStoreRuntime } from "../../dist/store/types.js";
 import { counterDefinition } from "../fixtures.mjs";
 
 const attachRequest = (sessionId) => ({
@@ -158,4 +159,37 @@ test("host removes a destroyed session when publication fails", () => {
 
   assert.equal(destroyedDeliveries, 1);
   assert.deepEqual(healthyRevisions, [1, 2]);
+});
+
+test("host rolls back a session when snapshot capture fails during attach", () => {
+  let failAttachSnapshot = true;
+  const store = {
+    getSnapshot() {
+      if (failAttachSnapshot) {
+        failAttachSnapshot = false;
+        return { storeId: "counter", revision: 0, state: { value: 0 } };
+      }
+      if (!this.allowSnapshot) throw new Error("snapshot failed");
+      return { storeId: "counter", revision: 0, state: { value: 0 } };
+    },
+    dispatch() {
+      throw new Error("unused");
+    },
+    allowSnapshot: false,
+  };
+  store[canonicalStoreRuntime] = () => ({
+    getSnapshot: () => store.getSnapshot(),
+    dispatch: () => store.dispatch(),
+  });
+  const host = createProtocolHost(store);
+
+  assert.equal(
+    host.attach(attachRequest("session-a"), () => undefined).type,
+    "PROTOCOL_ERROR",
+  );
+  store.allowSnapshot = true;
+  assert.equal(
+    host.attach(attachRequest("session-a"), () => undefined).type,
+    "ATTACHED",
+  );
 });

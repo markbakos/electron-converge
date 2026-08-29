@@ -8,6 +8,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./main": {
+      "types": "./dist/electron-main/index.d.ts",
+      "import": "./dist/electron-main/index.js"
     }
   },
   "packageManager": "pnpm@11.21.0",
@@ -21,7 +25,11 @@
     "test": "pnpm build && node --test test/*.test.mjs test/protocol/*.test.mjs && tsc -p tsconfig.test.json",
     "check": "pnpm test"
   },
+  "peerDependencies": {
+    "electron": ">=42 <45"
+  },
   "devDependencies": {
+    "electron": "42.10.1",
     "fast-check": "4.9.0",
     "typescript": "7.0.2"
   }

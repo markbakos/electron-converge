@@ -7,6 +7,14 @@ export function counterDefinition(extraActions = {}) {
       counter: { value: 0 },
       settings: { theme: "dark" },
     },
+    inputs: {
+      increment(value) {
+        return typeof value === "number";
+      },
+      ...Object.fromEntries(
+        Object.keys(extraActions).map((name) => [name, () => true]),
+      ),
+    },
     actions: {
       increment(state, amount) {
         const value = state.counter.value + amount;

@@ -34,3 +34,18 @@ test("protocol validation rejects malformed records without invoking accessors",
     (error) => error.code === "INVALID_PROTOCOL",
   );
 });
+
+test("protocol validation rejects oversized and control-character identifiers", () => {
+  for (const sessionId of ["x".repeat(129), "session\nother"]) {
+    assert.throws(
+      () =>
+        parseAttachRequest({
+          protocol: 1,
+          type: "ATTACH",
+          storeId: "counter",
+          sessionId,
+        }),
+      (error) => error.code === "INVALID_PROTOCOL",
+    );
+  }
+});

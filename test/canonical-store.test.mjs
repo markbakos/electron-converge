@@ -115,7 +115,76 @@ test("dispatch rejects inherited action names", () => {
   assert.equal(store.getRevision(), 0);
 });
 
+test("dispatch rejects an input that fails its action validator", () => {
+  const store = createCanonicalStore({
+    id: "validated",
+    initialState: { value: 0 },
+    inputs: {
+      set(value) {
+        return typeof value === "number";
+      },
+    },
+    actions: {
+      set(state, value) {
+        return { state: { value }, result: value };
+      },
+    },
+  });
+
+  assert.throws(
+    () => store.dispatch("set", "not-a-number"),
+    (error) => error instanceof ConvergeError && error.code === "INVALID_INPUT",
+  );
+  assert.equal(store.getRevision(), 0);
+  assert.deepEqual(store.getState(), { value: 0 });
+});
+
+test("dispatch converts throwing and Promise-like validators to INVALID_INPUT", () => {
+  for (const validate of [
+    () => {
+      throw new Error("private validator detail");
+    },
+    () => Promise.resolve(true),
+  ]) {
+    const store = createCanonicalStore({
+      id: "validated",
+      initialState: { value: 0 },
+      inputs: { set: validate },
+      actions: {
+        set(state, value) {
+          return { state: { value }, result: value };
+        },
+      },
+    });
+
+    assert.throws(
+      () => store.dispatch("set", 1),
+      (error) => error instanceof ConvergeError && error.code === "INVALID_INPUT",
+    );
+    assert.equal(store.getRevision(), 0);
+  }
+});
+
 test("store creation snapshots and validates action definitions", () => {
+  assert.throws(
+    () =>
+      createCanonicalStore({
+        ...counterDefinition(),
+        id: "x".repeat(129),
+      }),
+    (error) => error instanceof ConvergeError && error.code === "INVALID_STORE",
+  );
+  assert.throws(
+    () =>
+      createCanonicalStore(
+        counterDefinition({
+          ["x".repeat(129)](state) {
+            return { state, result: undefined };
+          },
+        }),
+      ),
+    (error) => error instanceof ConvergeError && error.code === "INVALID_STORE",
+  );
   assert.throws(
     () =>
       createCanonicalStore(
@@ -131,6 +200,7 @@ test("store creation snapshots and validates action definitions", () => {
   const definition = counterDefinition();
   const store = createCanonicalStore(definition);
   definition.actions.increment = (state) => ({ state, result: 999 });
+  definition.inputs.increment = () => false;
 
   assert.equal(store.dispatch("increment", 1).result, 1);
 });

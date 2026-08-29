@@ -8,9 +8,11 @@ export type ErrorCode =
   | "INVALID_STATE"
   | "INVALID_STORE"
   | "RECOVERY_FAILED"
+  | "RESOURCE_LIMIT"
   | "REVISION_EXHAUSTED"
   | "SERIALIZATION_FAILED"
   | "STALE_SESSION"
+  | "UNAUTHORIZED"
   | "UNKNOWN_ACTION";
 
 const ERROR_MESSAGES: Record<ErrorCode, string> = {
@@ -23,9 +25,11 @@ const ERROR_MESSAGES: Record<ErrorCode, string> = {
   INVALID_STATE: "Invalid state",
   INVALID_STORE: "Invalid store",
   RECOVERY_FAILED: "Recovery failed",
+  RESOURCE_LIMIT: "Resource limit exceeded",
   REVISION_EXHAUSTED: "Revision limit reached",
   SERIALIZATION_FAILED: "Serialization failed",
   STALE_SESSION: "Stale session",
+  UNAUTHORIZED: "Unauthorized",
   UNKNOWN_ACTION: "Unknown action",
 };
 
