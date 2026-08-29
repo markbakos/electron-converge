@@ -1,7 +1,20 @@
 {
   "name": "electron-converge",
-  "version": "0.0.0",
-  "private": true,
+  "version": "1.0.0",
+  "description": "Strongly consistent state across Electron processes",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/markbakos/electron-converge.git"
+  },
+  "bugs": "https://github.com/markbakos/electron-converge/issues",
+  "homepage": "https://github.com/markbakos/electron-converge#readme",
+  "keywords": [
+    "electron",
+    "state-management",
+    "react",
+    "ipc"
+  ],
   "type": "module",
   "files": [
     "dist"
@@ -34,14 +47,15 @@
     "pnpm": ">=11 <12"
   },
   "scripts": {
-    "build": "tsc -b --clean && tsc",
+    "build": "pnpm clean && tsc",
     "build:fixture": "node scripts/build-electron-fixture.mjs",
     "bench": "pnpm build && pnpm build:fixture && node bench/electron.mjs",
-    "clean": "tsc -b --clean",
+    "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
     "test": "pnpm build && pnpm build:fixture && node --test test/*.test.mjs test/protocol/*.test.mjs && tsc -p tsconfig.test.json",
     "test:e2e": "pnpm build && pnpm build:fixture && node --test test/electron-e2e.test.mjs",
     "test:pack": "pnpm build && node scripts/verify-package.mjs",
-    "check": "pnpm test"
+    "check": "pnpm test",
+    "prepublishOnly": "pnpm check && node scripts/verify-package.mjs"
   },
   "peerDependencies": {
     "electron": ">=42 <45",

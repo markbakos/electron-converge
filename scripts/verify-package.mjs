@@ -6,10 +6,12 @@ import path from "node:path";
 
 const root = path.resolve(import.meta.dirname, "..");
 const temporary = await mkdtemp(path.join(os.tmpdir(), "electron-converge-pack-"));
+const npmEnvironment = { ...process.env, NPM_CONFIG_DRY_RUN: "false" };
 const packResult = JSON.parse(
   execFileSync("npm", ["pack", "--json", "--pack-destination", temporary], {
     cwd: root,
     encoding: "utf8",
+    env: npmEnvironment,
   }),
 );
 const packed = Array.isArray(packResult)
@@ -53,8 +55,9 @@ execFileSync(
     "--no-audit",
     "--no-fund",
     path.join(temporary, packed.filename),
+    path.join(root, "node_modules/react"),
   ],
-  { cwd: consumer, stdio: "inherit" },
+  { cwd: consumer, env: npmEnvironment, stdio: "inherit" },
 );
 await writeFile(
   path.join(consumer, "verify.mjs"),
