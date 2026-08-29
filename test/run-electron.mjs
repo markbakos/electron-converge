@@ -8,7 +8,10 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 export function runElectron(mode, environment = {}, timeoutMs = 120_000) {
   return new Promise((resolve, reject) => {
-    const child = spawn(electron, [path.join(root, "test/electron-app/main.mjs")], {
+    const args = [path.join(root, "test/electron-app/main.mjs")];
+    // Testing only: https://www.electronjs.org/docs/latest/tutorial/sandbox#disabling-chromiums-sandbox-testing-only
+    if (process.env.GITHUB_ACTIONS === "true") args.unshift("--no-sandbox");
+    const child = spawn(electron, args, {
       cwd: root,
       env: {
         ...process.env,
