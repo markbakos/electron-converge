@@ -7,6 +7,7 @@ export type ErrorCode =
   | "INVALID_PROTOCOL"
   | "INVALID_STATE"
   | "INVALID_STORE"
+  | "OUTCOME_UNKNOWN"
   | "RECOVERY_FAILED"
   | "RESOURCE_LIMIT"
   | "REVISION_EXHAUSTED"
@@ -24,6 +25,7 @@ const ERROR_MESSAGES: Record<ErrorCode, string> = {
   INVALID_PROTOCOL: "Invalid protocol message",
   INVALID_STATE: "Invalid state",
   INVALID_STORE: "Invalid store",
+  OUTCOME_UNKNOWN: "Canonical outcome unknown",
   RECOVERY_FAILED: "Recovery failed",
   RESOURCE_LIMIT: "Resource limit exceeded",
   REVISION_EXHAUSTED: "Revision limit reached",

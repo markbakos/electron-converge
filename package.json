@@ -12,6 +12,10 @@
     "./main": {
       "types": "./dist/electron-main/index.d.ts",
       "import": "./dist/electron-main/index.js"
+    },
+    "./renderer": {
+      "types": "./dist/electron-renderer/index.d.ts",
+      "import": "./dist/electron-renderer/index.js"
     }
   },
   "packageManager": "pnpm@11.21.0",
