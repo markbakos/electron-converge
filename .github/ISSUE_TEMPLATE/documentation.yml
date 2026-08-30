@@ -1,0 +1,71 @@
+name: Documentation improvement
+description: Report missing, inaccurate, or unclear project documentation.
+title: "[Docs]: "
+labels:
+  - documentation
+body:
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      options:
+        - label: I searched existing documentation issues.
+          required: true
+        - label: This report contains no secrets or private application data.
+          required: true
+  - type: input
+    id: location
+    attributes:
+      label: Documentation location
+      description: Link the README heading, file, public API, error, or example.
+      placeholder: README.md#usage or electron-converge/renderer
+    validations:
+      required: true
+
+  - type: dropdown
+    id: problem-type
+    attributes:
+      label: Problem type
+      options:
+        - Missing documentation
+        - Incorrect or stale documentation
+        - Unclear explanation
+        - Broken or unsafe example
+        - API reference gap
+        - Compatibility or migration gap
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Explain what a reader cannot determine or what statement is inaccurate.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-change
+    attributes:
+      label: Proposed change
+      description: Describe the smallest correction or example that would resolve the problem.
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Supporting evidence
+      description: Link current official Electron, React, TypeScript, Node.js, or GitHub documentation when the correction depends on platform behavior.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: contract
+    attributes:
+      label: Contract check
+      options:
+        - label: The proposed wording keeps main authoritative and renderers as revisioned replicas.
+          required: true
+        - label: The proposed wording does not promise synchronous IPC, simultaneous rendering, disk durability, or automatic retry.
+          required: true

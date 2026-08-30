@@ -1,0 +1,96 @@
+name: Feature request
+description: Propose an additive capability or developer-experience improvement.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Start with the user problem. Proposed features must preserve main authority, acknowledged actions, ordered replicas, and automatic recovery unless a separately approved major-version design changes a guarantee.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      options:
+        - label: I searched existing issues and the roadmap for this request.
+          required: true
+        - label: This request is based on a concrete application need, not only possible future flexibility.
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What application or contributor problem cannot be handled cleanly today?
+    validations:
+      required: true
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Concrete use case
+      description: Show the smallest realistic flow, including processes or windows involved.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: plane
+    attributes:
+      label: Communication plane
+      description: Where does this concern belong?
+      options:
+        - State plane — shared reactive facts and deterministic transitions
+        - Effect plane — filesystem, database, network, dialog, or long-running work
+        - Stream plane — continuous or high-frequency data
+        - Tooling, testing, documentation, or packaging
+        - Unsure
+    validations:
+      required: true
+
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: Describe observable behavior, not only a preferred implementation.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed API or approach
+      description: Optional. Include compatibility and lifecycle behavior if you have a concrete proposal.
+      render: typescript
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: impact
+    attributes:
+      label: Contract impact
+      options:
+        - label: Main remains the only canonical state owner.
+          required: true
+        - label: A successful action still waits for main commit and source-replica installation.
+          required: true
+        - label: Renderer reads and framework renders still use local state without IPC.
+          required: true
+        - label: I described any effect on revisions, recovery, authorization, serialization, package exports, or peer support below.
+          required: true
+
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Compatibility and risks
+      description: Cover revisions, recovery, authorization, serialization, package exports, peer versions, performance, or migration when relevant.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Include application-owned code, existing platform features, or using another communication plane.
+    validations:
+      required: true
