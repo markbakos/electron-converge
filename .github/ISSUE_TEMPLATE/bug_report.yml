@@ -1,0 +1,147 @@
+name: Bug report
+description: Report reproducible incorrect behavior in Electron Converge.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. For security vulnerabilities, stop here and use the private security-reporting link in the template chooser.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      options:
+        - label: I searched existing issues and did not find a duplicate.
+          required: true
+        - label: This report contains no secrets, private application state, personal data, or sensitive paths.
+          required: true
+        - label: This is not a security vulnerability.
+          required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Describe the incorrect behavior in a few sentences.
+      placeholder: What happened, and which Electron Converge behavior is affected?
+    validations:
+      required: true
+
+  - type: input
+    id: converge-version
+    attributes:
+      label: Electron Converge version
+      placeholder: 1.0.0
+    validations:
+      required: true
+
+  - type: input
+    id: electron-version
+    attributes:
+      label: Electron version
+      placeholder: 44.0.0
+    validations:
+      required: true
+
+  - type: input
+    id: node-version
+    attributes:
+      label: Node.js version
+      placeholder: 24.18.1
+    validations:
+      required: true
+
+  - type: input
+    id: react-version
+    attributes:
+      label: React version
+      description: Enter "Not used" when the React binding is not involved.
+      placeholder: 19.2.0 or Not used
+    validations:
+      required: true
+
+  - type: input
+    id: operating-system
+    attributes:
+      label: Operating system
+      placeholder: Ubuntu 24.04, macOS 15, or Windows 11
+    validations:
+      required: true
+
+  - type: dropdown
+    id: entry-point
+    attributes:
+      label: Affected public entry point
+      options:
+        - electron-converge
+        - electron-converge/main
+        - electron-converge/preload
+        - electron-converge/renderer
+        - electron-converge/react
+        - Packaging or release workflow
+        - Unsure or multiple
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected behavior
+      options:
+        - Canonical reducer or revision
+        - Action acknowledgement
+        - Replica ordering or recovery
+        - Attach, reload, crash, or lifecycle
+        - Authorization or validation
+        - React or subscription notification
+        - Types, exports, or packaging
+        - Performance or resource limits
+        - Other or unsure
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Link a minimal repository or provide the smallest code that reproduces the problem.
+      placeholder: Include store definition, main registration, preload setup, renderer call, and any required timing.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Start the application with ...
+        2. Open two windows ...
+        3. Dispatch ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Additional evidence
+      description: Add sanitized errors, revisions, statuses, screenshots, or logs. Explain whether the result came from Node simulation, real Electron, or manual testing.
+      render: shell
+    validations:
+      required: false

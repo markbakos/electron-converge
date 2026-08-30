@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/markbakos/electron-converge/security/advisories/new
+    about: Report suspected vulnerabilities privately. Do not open a public issue.
+  - name: Usage and support
+    url: https://github.com/markbakos/electron-converge#readme
+    about: Check installation, usage, process boundaries, and supported versions before filing an issue.
